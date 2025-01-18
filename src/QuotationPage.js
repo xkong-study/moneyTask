@@ -154,6 +154,7 @@ const QuotationPage = () => {
 
     const pageRef = useRef(null); // 引用整个页面
     const handleQuantityChange = async (mainCategory, itemName, value,rowId,ID) => {
+        if(value == 0) return;
         // 更新数量
         setSelectedOptions((prevOptions) => {
             const updatedOptions = [...prevOptions];
@@ -212,6 +213,7 @@ const QuotationPage = () => {
                 }
                 else individualCost.set(rowId,[subTotal]);
             });
+            console.log(sum);
             setSum(sum);
             setIndividualCost(individualCost);
             setTotalCost(newTotalCost);
@@ -308,6 +310,8 @@ const QuotationPage = () => {
     // 📄 导出为 PDFUnit price
     const exportToPDF = () => {
         const input = pageRef.current;
+        const elements = document.querySelectorAll('.no-export');
+        elements.forEach((el) => (el.style.display = 'none'));
         html2canvas(input, { scale: 3 }).then((canvas) => {
             const imgData = canvas.toDataURL('image/png');
             const pdf = new jsPDF('p', 'mm', 'a4'); // A4 页面纵向
@@ -316,15 +320,36 @@ const QuotationPage = () => {
             const pageHeight = 297; // A4 页面高度（mm）
             const margin = 10; // 边距（mm）
 
-            // 计算图片宽高以适应页面
             const imgWidth = pageWidth - margin * 2; // 内容宽度
             const imgHeight = (canvas.height * imgWidth) / canvas.width; // 按比例计算内容高度
 
             let position = margin; // 初始位置，带上边距
-            pdf.addImage(imgData, 'PNG', margin, position, imgWidth, imgHeight); // 设置图片在页面中的位置
+            let remainingHeight = canvas.height; // 剩余的高度
+            let yOffset = 0; // 当前内容绘制的起始位置
+
+            while (remainingHeight > 0) {
+                const canvasSlice = document.createElement('canvas');
+                canvasSlice.width = canvas.width;
+                canvasSlice.height = Math.min(canvas.height, (pageHeight - margin * 2) * (canvas.width / imgWidth));
+
+                const ctx = canvasSlice.getContext('2d');
+                ctx.drawImage(canvas, 0, yOffset, canvas.width, canvasSlice.height, 0, 0, canvas.width, canvasSlice.height);
+
+                const sliceImgData = canvasSlice.toDataURL('image/png');
+                pdf.addImage(sliceImgData, 'PNG', margin, margin, imgWidth, (canvasSlice.height * imgWidth) / canvas.width);
+
+                remainingHeight -= canvasSlice.height;
+                yOffset += canvasSlice.height;
+
+                if (remainingHeight > 0) {
+                    pdf.addPage();
+                }
+            }
+
             pdf.save('quotation.pdf');
         });
     };
+
     const tableRef = useRef(null);
     // 📊 导出为 Excel
     // 🛠️ 导出 Excel 优化后的样式
@@ -333,18 +358,20 @@ const QuotationPage = () => {
     }, [tableData]);
 
     const exportToExcel = () => {
+        const elements = document.querySelectorAll('.no-export');
+        elements.forEach((el) => (el.style.display = 'none'));
         if (tableRef.current) {
             const rows = tableRef.current.querySelectorAll("tr");
             const toValue = document.getElementById('to-select').value;
             const addressValue = document.getElementById('address-textarea').value;
-            const deliveryTerms = document.getElementById('delivery-terms').value;
-            const shippingType = document.getElementById('shipping-type').value;
-            const paymentTerms = document.getElementById('payment-terms').value;
+            // const deliveryTerms = document.getElementById('delivery-terms').value;
+            // const shippingType = document.getElementById('shipping-type').value;
+            // const paymentTerms = document.getElementById('payment-terms').value;
             const validityDate = document.getElementById('validity-date').value;
-            const deliveryTime = document.getElementById('delivery-time').value;
+            // const deliveryTime = document.getElementById('delivery-time').value;
             const quotationNo = document.getElementById('quotation-no').value;
-            const contactPerson = document.getElementById('contact-person').value;
-            const contactTel = document.getElementById('contact-tel').value;
+            // const contactPerson = document.getElementById('contact-person').value;
+            // const contactTel = document.getElementById('contact-tel').value;
             const quotationDate = document.getElementById('quotation-date').value;
 
             const extractedData = Array.from(rows).map((row) => {
@@ -531,7 +558,7 @@ const QuotationPage = () => {
                 });
             });
 
-            currentRow += 50;
+            currentRow += 30;
             const technicalSpecifications = {
                 'Disc brake SB28.5-BL450-8': [
                     '- automatic wear compensator',
@@ -591,9 +618,12 @@ const QuotationPage = () => {
         }
     };
     const [data, setData] = useState([]); // 保存描述信息
+    const [isOpen,setIsOpen] = useState(true);
 
     // 获取描述数据
     const fetchDescription = async () => {
+        setIsOpen(!isOpen);
+        if(isOpen == false) return;
         try {
             const response = await fetch("http://127.0.0.1:8080/demo/desc", {
                 method: "POST",
@@ -608,8 +638,7 @@ const QuotationPage = () => {
             }
 
             const result = await response.json();
-            console.log(result)
-            setData((prevData) => [...prevData, result]);
+            setData( [result]);
         } catch (error) {
             console.error("Error fetching description:", error);
         }
@@ -729,8 +758,8 @@ const QuotationPage = () => {
                     <p><strong>Project Name:</strong> <span className="bold">1002001367-TIL Brazil PNV 2xSTS</span></p>
                     <p><strong>R1:</strong> provide additional discount</p>
                     <div className="rowButton">
-                        <button onClick={handleAddRow}>Add Row</button>
-                        <button onClick={fetchDescription}>Show</button>
+                        <button className="no-export" onClick={handleAddRow}>Add Row</button>
+                        <button className="no-export" onClick={fetchDescription}>Show</button>
                     </div>
                 </div>
 
@@ -795,7 +824,7 @@ const QuotationPage = () => {
                                             </option>
                                         ))}
                                     </select>
-                                    <button onClick={() => handleDeleteRow(index)}>Delete</button>
+                                    <button className="no-export" onClick={() => handleDeleteRow(index)}>Delete</button>
                                 </td>
                                 <td></td>
                                 <td></td>
@@ -844,7 +873,7 @@ const QuotationPage = () => {
                     ))}
                     </tbody>
                 </table>
-                {data.length > 0 && (
+                {data.length > 0 && isOpen && (
                     <table border="1" style={{ width: "100%", marginTop: "20px", textAlign: "left" }}>
                         <thead>
                         <tr>
