@@ -1,0 +1,300 @@
+/* 容器样式 */
+.quotation-container {
+    font-family: Arial, sans-serif;
+    margin: 40px;
+    line-height: 1.6;
+}
+
+/* 标题样式 */
+.header {
+    text-align: center;
+    margin-bottom: 10px;
+}
+
+.header h1 {
+    font-size: 24px;
+    font-weight: bold;
+}
+
+.header .sub-header {
+    font-size: 18px;
+    font-weight: bold;
+    margin-top: 10px;
+    margin-left: -20%;
+}
+
+.header hr {
+    border: none;
+    border-top: 2px solid black;
+    margin: 5px 0 15px;
+}
+
+/* 左右分区 */
+.quotation-details {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 20px;
+}
+
+/* 左侧部分 */
+.left-section {
+    width: 48%;
+}
+
+/* 字段行样式 */
+.left-section p {
+    margin: 5px 0;
+    display: flex;
+    align-items: flex-start;
+}
+
+/* 字段标签 */
+.left-section strong {
+    margin-right: 5px;
+    white-space: nowrap;
+}
+
+/* 限定宽度，超出换行 */
+.limited-width {
+    max-width: 50%;
+    word-wrap: break-word;
+    display: inline-block;
+    font-weight: bold;
+}
+
+.address-block {
+    display: block;
+    margin-left: 5px;
+    font-weight: bold;
+}
+
+/* 地址间距优化 */
+.left-section .spaced-line {
+    margin-top: 15px;
+    margin-bottom: 10px;
+}
+
+/* 右侧部分 */
+.right-section {
+    width: 48%;
+}
+
+.right-section p {
+    margin: 5px 0;
+}
+
+.right-section strong {
+    margin-right: 5px;
+}
+
+.term-row {
+    display: flex;
+    margin: 5px 0;
+}
+
+/* 左侧标签 */
+.term-label {
+    width: 150px; /* 固定宽度 */
+    font-weight: bold;
+    text-align: right;
+    margin-right: 10px;
+    white-space: nowrap;
+}
+
+/* 右侧值 */
+.term-value {
+    flex: 1;
+    text-align: left;
+    word-wrap: break-word;
+}
+
+.terms {
+    text-align: justify; /* 两端对齐 */
+    text-justify: inter-word; /* 单词间距调整 */
+    margin: -5px auto; /* 居中显示 */
+    line-height: 1.6; /* 行高增加，提升可读性 */
+}
+
+.terms p {
+    margin-bottom: -15px; /* 段落间距 */
+}
+
+.terms ul {
+    padding-left: 1em; /* 内边距调整 */
+    margin-bottom: -15px;
+    list-style-type: none;
+}
+
+.terms li {
+    margin-bottom: -2px; /* 列表项之间的间距 */
+}
+
+.terms a {
+    color: inherit; /* 使用父元素的文字颜色 */
+    text-decoration: none; /* 去掉下划线 */
+}
+
+.terms li::before {
+    content: "- "; /* 在每个列表项前添加短横线 */
+    margin-left: -15px
+}
+
+/* 右侧部分 */
+.right-section {
+    width: 48%;
+}
+
+.right-section p {
+    margin: 5px 0;
+}
+
+.right-section strong {
+    margin-right: 5px;
+}
+
+.term-row {
+    display: flex; /* 弹性布局 */
+    margin: 5px 0;
+    align-items: flex-start; /* 确保顶部对齐 */
+    width: 800px
+}
+
+/* 左侧标签 */
+.term-label {
+    width: 150px; /* 调整这里的宽度来改变标签部分 */
+    font-weight: bold;
+    text-align: left;
+    margin-right: 15px; /* 增加右侧间距 */
+    white-space: nowrap; /* 防止标签换行 */
+}
+
+/* 右侧内容 */
+.term-value {
+    flex: 1; /* 占满剩余空间 */
+    word-wrap: break-word; /* 自动换行 */
+}
+
+/* 当屏幕较小时的响应式调整 */
+@media (max-width: 768px) {
+    .term-label {
+        width: 120px; /* 在小屏幕上缩小标签宽度 */
+    }
+}
+
+/* 确保每行元素垂直对齐 */
+.term-row span {
+    display: inline-block;
+    vertical-align: top;
+}
+
+/* 项目详情 */
+.project-details {
+    font-family: Arial, sans-serif;
+    margin-bottom: 20px;
+    margin-top: 50px;
+    font-size: 16px;
+}
+
+.project-details p {
+    margin: 0 0 5px;
+    font-size: 16px;
+}
+
+.project-details .bold {
+    font-weight: bold;
+}
+
+.project-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-family: Arial, sans-serif;
+    font-size: 14px;
+    text-align: center; /* 全表格内容居中 */
+}
+
+.project-table th,
+.project-table td {
+    border: 1px solid #000;
+    padding: 8px;
+    text-align: center; /* 单元格内容居中 */
+}
+
+.project-table th {
+    background-color: #f9f9f9;
+    font-weight: bold;
+}
+
+.project-table tbody tr {
+    background-color: #f9f9f9;
+}
+
+/* sub total 样式 */
+.project-table .subtotal-row td {
+    font-weight: bold;
+    color: red;
+}
+
+.project-table .subtotal {
+    color: red;
+    font-weight: bold;
+}
+
+.project-table .total-row {
+    background-color: #b3c9a3;
+    font-weight: bold;
+}
+
+.project-table .totalWord {
+    color: red;
+    text-align: right;
+    font-weight: bold;
+}
+
+.project-table .total {
+    color: green;
+    font-weight: bold;
+}
+
+/* 右对齐数字单元格 */
+.project-table td:nth-child(3),
+.project-table td:nth-child(4),
+.project-table td:nth-child(5) {
+    text-align: center;
+}
+
+.modal {
+    position: fixed; /* 固定在视口上 */
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%); /* 居中 */
+    z-index: 1000; /* 确保浮于其他元素上 */
+    background: white;
+    padding: 20px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    border-radius: 8px;
+    width: 400px;
+    max-width: 90%;
+}
+
+.modal ul {
+    list-style: none; /* Remove default bullet points */
+    padding: 0;
+}
+
+.modal li {
+    text-align: left; /* Align content to the left */
+}
+
+.rowButton{
+    margin-top: 1%;
+}
+
+.modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.5); /* 半透明背景 */
+    z-index: 999; /* 遮罩层在模态框下 */
+}
