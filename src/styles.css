@@ -56,10 +56,21 @@
 
 /* 限定宽度，超出换行 */
 .limited-width {
-    max-width: 50%;
+    max-width: 100%;
     word-wrap: break-word;
     display: inline-block;
     font-weight: bold;
+    font-size: 15.5px;
+    margin-left: 5px;
+}
+
+.limited-widthInput {
+    max-width: 100%;
+    word-wrap: break-word;
+    display: inline-block;
+    font-weight: bold;
+    font-size: 15.5px;
+    max-height:18px;
 }
 
 .address-block {
@@ -99,6 +110,7 @@
     text-align: right;
     margin-right: 10px;
     white-space: nowrap;
+    font-size: 15.5px;
 }
 
 /* 右侧值 */

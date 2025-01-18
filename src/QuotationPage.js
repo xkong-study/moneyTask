@@ -308,14 +308,20 @@ const QuotationPage = () => {
     // 📄 导出为 PDFUnit price
     const exportToPDF = () => {
         const input = pageRef.current;
-        html2canvas(input, {scale: 2}).then((canvas) => {
+        html2canvas(input, { scale: 3 }).then((canvas) => {
             const imgData = canvas.toDataURL('image/png');
-            const pdf = new jsPDF('p', 'mm', 'a4'); // A4 纸张，纵向
-            const imgWidth = 210; // A4 页面宽度
-            const imgHeight = (canvas.height * imgWidth) / canvas.width;
+            const pdf = new jsPDF('p', 'mm', 'a4'); // A4 页面纵向
 
-            let position = 0;
-            pdf.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight);
+            const pageWidth = 210; // A4 页面宽度（mm）
+            const pageHeight = 297; // A4 页面高度（mm）
+            const margin = 10; // 边距（mm）
+
+            // 计算图片宽高以适应页面
+            const imgWidth = pageWidth - margin * 2; // 内容宽度
+            const imgHeight = (canvas.height * imgWidth) / canvas.width; // 按比例计算内容高度
+
+            let position = margin; // 初始位置，带上边距
+            pdf.addImage(imgData, 'PNG', margin, position, imgWidth, imgHeight); // 设置图片在页面中的位置
             pdf.save('quotation.pdf');
         });
     };
@@ -329,6 +335,17 @@ const QuotationPage = () => {
     const exportToExcel = () => {
         if (tableRef.current) {
             const rows = tableRef.current.querySelectorAll("tr");
+            const toValue = document.getElementById('to-select').value;
+            const addressValue = document.getElementById('address-textarea').value;
+            const deliveryTerms = document.getElementById('delivery-terms').value;
+            const shippingType = document.getElementById('shipping-type').value;
+            const paymentTerms = document.getElementById('payment-terms').value;
+            const validityDate = document.getElementById('validity-date').value;
+            const deliveryTime = document.getElementById('delivery-time').value;
+            const quotationNo = document.getElementById('quotation-no').value;
+            const contactPerson = document.getElementById('contact-person').value;
+            const contactTel = document.getElementById('contact-tel').value;
+            const quotationDate = document.getElementById('quotation-date').value;
 
             const extractedData = Array.from(rows).map((row) => {
                 const cells = row.querySelectorAll("td, th");
@@ -346,7 +363,7 @@ const QuotationPage = () => {
             const workbook = new ExcelJS.Workbook();
             const worksheet = workbook.addWorksheet('Quotation');
 
-            let currentRow = 2; // 动态跟踪当前行
+            let currentRow = 1; // 动态跟踪当前行
 
             // ✅ 标题部分
             worksheet.mergeCells(`A${currentRow}:E${currentRow}`);
@@ -364,7 +381,7 @@ const QuotationPage = () => {
 
             // ✅ 公司和客户信息
             worksheet.mergeCells(`A${currentRow}:C${currentRow}`);
-            worksheet.getCell(`A${currentRow}`).value = 'To: Shanghai Zhenhua Heavy Industries Company Limited';
+            worksheet.getCell(`A${currentRow}`).value = `To: ${toValue}`;
             worksheet.getCell(`A${currentRow}`).font = {bold: true};
             worksheet.getCell(`A${currentRow}`).fill = {
                 type: 'pattern',
@@ -374,7 +391,7 @@ const QuotationPage = () => {
 
             currentRow++;
             worksheet.mergeCells(`A${currentRow}:C${currentRow}`);
-            worksheet.getCell(`A${currentRow}`).value = 'Address: 3261 Dong Fang Road, 200125 SHANGHAI, P.R. CHINA';
+            worksheet.getCell(`B${currentRow}`).value = `Address: ${addressValue}`;
             worksheet.getCell(`A${currentRow}`).font = {bold: true};
             worksheet.getCell(`A${currentRow}`).fill = {
                 type: 'pattern',
@@ -383,7 +400,7 @@ const QuotationPage = () => {
             };
 
             worksheet.getCell(`D${currentRow - 1}`).value = 'Quotation no.:';
-            worksheet.getCell(`E${currentRow - 1}`).value = 'DBCN-QAD-820076515';
+            worksheet.getCell(`E${currentRow - 1}`).value = `${quotationNo}`;
 
             worksheet.getCell(`D${currentRow}`).value = 'Contact Person:';
             worksheet.getCell(`E${currentRow}`).value = 'DORIS SONG';
@@ -394,7 +411,7 @@ const QuotationPage = () => {
 
             currentRow++;
             worksheet.getCell(`D${currentRow}`).value = 'Date:';
-            worksheet.getCell(`E${currentRow}`).value = '2024/12/31';
+            worksheet.getCell(`K${currentRow}`).value = `${quotationDate}`;
             worksheet.getCell(`E${currentRow}`).font = {color: {argb: 'FF0000'}};
 
             currentRow += 2;
@@ -404,7 +421,7 @@ const QuotationPage = () => {
                 ['Terms of delivery:', 'CFR Shanghai'],
                 ['Shipping type:', 'Seafreight'],
                 ['Terms of payment:', 'irrevocable letter of credit at sight'],
-                ['Validity of prices:', '2025/1/8'],
+                ['Validity of prices:', `${validityDate}`],
                 ['Delivery time:', '13-14 weeks after receipt of your order and after complete technical clarification'],
             ];
 
@@ -614,13 +631,20 @@ const QuotationPage = () => {
                     <div className="left-section">
                         <p>
                             <span
-                                className="limited-width bold">To:Shanghai Zhenhua Heavy Industries Company Limited</span>
+                                className="limited-width bold" id="to-select">To:<select className="limited-width bold">
+                                <option className="bold">Shanghai Zhenhua Heavy Industries Company Limited</option>
+                                <option>Other Company A</option>
+                                <option>Other Company B</option>
+                            </select></span>
                         </p>
 
                         <p>
                             <div className="limited-width bold">Address:
-                                <span className="bold">3261 Dong Fang Road</span><br/>
-                                <span className="bold">200125 SHANGHAI, P.R. CHINA</span>
+                                <select className="limited-width bold" id="address-textarea">
+                                    <option className="bold">3261 Dong Fang Road 200125 SHANGHAI, P.R. CHINA</option>
+                                    <option>Other Address A</option>
+                                    <option>Other Address B</option>
+                                </select>
                             </div>
                         </p>
 
@@ -630,29 +654,29 @@ const QuotationPage = () => {
                         <div className="aligned-terms">
                             <div className="term-row">
                                 <span className="term-label">Terms of delivery:</span>
-                                <span className="term-value">CFR Shanghai</span>
+                                <span className="term-value"id="delivery-terms">FR Shanghai</span>
                             </div>
                             <div className="term-row">
                                 <span className="term-label">Shipping type:</span>
-                                <span className="term-value">Seafreight</span>
+                                <span className="term-value" id="shipping-type">Seafreight</span>
                             </div>
                             <div className="term-row">
                                 <span className="term-label">Terms of payment:</span>
-                                <span className="term-value">irrevocable letter of credit at sight</span>
+                                <span className="term-value" id="payment-terms">irrevocable letter of credit at sight</span>
                             </div>
                             <div className="term-row">
                                 <span className="term-label">Validity of prices:</span>
-                                <span className="term-value">2025/1/8</span>
+                                <span className="term-value" id="validity-date" >2025/1/8</span>
                             </div>
                             <div className="term-row">
                                 <span className="term-label">Delivery time:</span>
-                                <span className="term-value">13-14 weeks after receipt of your order and after complete technical clarification</span>
+                                <span className="term-value" id="delivery-time">13-14 weeks after receipt of your order and after complete technical clarification</span>
                             </div>
                         </div>
 
                     </div>
                     <div className="right-section">
-                        <p><strong>Quotation no.:</strong> 820076435-R1</p>
+                        <p><strong>Quotation no.:</strong> <textarea className="bold limited-widthInput" id="quotation-no">820076435-R1</textarea></p>
                         <p>
                             <strong>Contact Person:</strong>
                             <select value={selectedContact.name} onChange={handleContactChange}>
@@ -666,7 +690,7 @@ const QuotationPage = () => {
                         <p>
                             <strong>Tel:</strong> <span>{selectedContact.tel}</span>
                         </p>
-                        <p><strong>Date:</strong> 2024/12/25</p>
+                        <p><strong>Date:</strong> <input className="bold" type="date" id="quotation-date" /></p>
                     </div>
                 </div>
 
