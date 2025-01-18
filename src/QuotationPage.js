@@ -312,8 +312,8 @@ const QuotationPage = () => {
         const input = pageRef.current;
         const elements = document.querySelectorAll('.no-export');
         elements.forEach((el) => (el.style.display = 'none'));
-        html2canvas(input, { scale: 3 }).then((canvas) => {
-            const imgData = canvas.toDataURL('image/png');
+        html2canvas(input, { scale: 2 }).then((canvas) => {
+            const imgData = canvas.toDataURL('image/jpeg', 0.75);
             const pdf = new jsPDF('p', 'mm', 'a4'); // A4 页面纵向
 
             const pageWidth = 210; // A4 页面宽度（mm）
@@ -335,9 +335,8 @@ const QuotationPage = () => {
                 const ctx = canvasSlice.getContext('2d');
                 ctx.drawImage(canvas, 0, yOffset, canvas.width, canvasSlice.height, 0, 0, canvas.width, canvasSlice.height);
 
-                const sliceImgData = canvasSlice.toDataURL('image/png');
-                pdf.addImage(sliceImgData, 'PNG', margin, margin, imgWidth, (canvasSlice.height * imgWidth) / canvas.width);
-
+                const sliceImgData = canvasSlice.toDataURL('image/jpeg', 0.75); // 每页
+                pdf.addImage(sliceImgData, 'JPEG', margin, margin, imgWidth, (canvasSlice.height * imgWidth) / canvas.width);
                 remainingHeight -= canvasSlice.height;
                 yOffset += canvasSlice.height;
 
@@ -345,8 +344,8 @@ const QuotationPage = () => {
                     pdf.addPage();
                 }
             }
-
             pdf.save('quotation.pdf');
+            elements.forEach((el) => (el.style.display = ''));
         });
     };
 
@@ -615,15 +614,29 @@ const QuotationPage = () => {
                 link.click();
                 URL.revokeObjectURL(link.href);
             });
+            elements.forEach((el) => (el.style.display = ''));
         }
     };
     const [data, setData] = useState([]); // 保存描述信息
-    const [isOpen,setIsOpen] = useState(true);
+    const [isOpen,setIsOpen] = useState(false);
 
     // 获取描述数据
-    const fetchDescription = async () => {
-        setIsOpen(!isOpen);
-        if(isOpen == false) return;
+    const [description, setDescription] = useState("");
+    const toggleDescription = async () => {
+        if (isOpen) {
+            setIsOpen(false);
+        } else {
+            // 如果已关闭，先打开再加载数据
+            setIsOpen(true);
+            try {
+                const data = await fetchDescriptionData();
+                setDescription(data);
+            } catch (error) {
+                console.error("Failed to fetch description:", error);
+            }
+        }
+    };
+    const fetchDescriptionData = async () => {
         try {
             const response = await fetch("http://127.0.0.1:8080/demo/desc", {
                 method: "POST",
@@ -759,7 +772,9 @@ const QuotationPage = () => {
                     <p><strong>R1:</strong> provide additional discount</p>
                     <div className="rowButton">
                         <button className="no-export" onClick={handleAddRow}>Add Row</button>
-                        <button className="no-export" onClick={fetchDescription}>Show</button>
+                        <button className="no-export" onClick={toggleDescription}>
+                            {isOpen ? "Close" : "Open"} Description
+                        </button>
                     </div>
                 </div>
 
