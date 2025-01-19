@@ -70,7 +70,13 @@
     display: inline-block;
     font-weight: bold;
     font-size: 15.5px;
-    max-height:18px;
+    max-height: 18px;
+    position: relative; /* 设置相对定位 */
+    top: 6px; /* 向下移动 10px */
+}
+.bold-large-select {
+    font-weight: bold; /* 加粗文字 */
+    font-size: 16px;   /* 增大文字大小 */
 }
 
 .address-block {
@@ -309,4 +315,20 @@
     height: 100%;
     background: rgba(0, 0, 0, 0.5); /* 半透明背景 */
     z-index: 999; /* 遮罩层在模态框下 */
+}
+
+@media print {
+    select {
+        display: none; /* 隐藏所有下拉菜单 */
+    }
+
+    #to-select::after {
+        content: "Shanghai Zhenhua Heavy Industries Company Limited"; /* 默认显示值 */
+        display: inline;
+    }
+
+    #address-textarea::after {
+        content: "3261 Dong Fang Road 200125 SHANGHAI, P.R. CHINA"; /* 默认显示值 */
+        display: inline;
+    }
 }

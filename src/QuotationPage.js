@@ -48,8 +48,42 @@ const QuotationPage = () => {
         fetchOptions().then(r => r);
     }, []);
 
-    const handleMainCategoryChange = (event, index) => {
+    const handleMainCategoryChange = async (event, index) => {
         const selectedCategory = event.target.value;
+        const payload = {
+            customerType: "B客户",
+            products: [
+                {
+                    mainProduct: selectedCategory,
+                    option:  "",
+                    quantity: 0,
+                },
+            ],
+        };
+
+        try {
+            const response = await fetch("http://127.0.0.1:8080/demo/quote", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                },
+                body: JSON.stringify(payload),
+            });
+
+            if (!response.ok) {
+                throw new Error("Failed to fetch data from backend");
+            }
+
+            const result = await response.json();
+            unitCost[index] = result.totalCost;
+            console.log(unitCost)
+            setUnitCost(unitCost)
+        } catch (error) {
+            // Log or display the error
+            console.error("An error occurred:", error.message);
+            // Optionally, display a user-friendly message
+            alert("Failed to fetch data from the backend. Please try again.");
+        }
         const quantity = new Map();
 
         if (selectedCategory === "") {
@@ -101,6 +135,11 @@ const QuotationPage = () => {
             return updatedCosts;
         });
 
+        setUnitCost((prevUnitCost) => {
+            const updatedUnitCost = [...prevUnitCost];
+            updatedUnitCost.splice(deleteIndex, 1);
+            return updatedUnitCost;
+        });
     };
 
 
@@ -154,7 +193,7 @@ const QuotationPage = () => {
 
     const pageRef = useRef(null); // 引用整个页面
     const handleQuantityChange = async (mainCategory, itemName, value,rowId,ID) => {
-        if(value == 0) return;
+        if(value == 0 || !mainCategory) return;
         // 更新数量
         setSelectedOptions((prevOptions) => {
             const updatedOptions = [...prevOptions];
@@ -254,6 +293,7 @@ const QuotationPage = () => {
         ])
     );
     const [sum,setSum] = useState([]);
+    const [unitCost,setUnitCost] = useState([]);
 
     const sendDataToBackend = async () => {
         const payload = preparePayload();
@@ -310,8 +350,29 @@ const QuotationPage = () => {
     // 📄 导出为 PDFUnit price
     const exportToPDF = () => {
         const input = pageRef.current;
-        const elements = document.querySelectorAll('.no-export');
+        const elements = [...document.querySelectorAll('.no-export')];
         elements.forEach((el) => (el.style.display = 'none'));
+        const selects = [...document.querySelectorAll('select')]
+        const textArea = [...document.querySelectorAll('textarea')]
+        const dateInputs = [...document.querySelectorAll('input[type="date"]')];
+// Apply styles to hide the border
+        dateInputs.forEach((dateInput) => {
+            dateInput.style.border = 'none';          // Remove the border
+            dateInput.style.background = 'none';     // Optional: remove background
+            dateInput.style.outline = 'none';        // Remove focus outline
+        });
+        selects.forEach((select) => {
+            select.style.border = 'none';
+            select.style.background = 'none';
+            select.style.appearance = 'none';
+            select.style.pointerEvents = 'none';
+        });
+        textArea.forEach((element) => {
+            element.style.border = 'none';          // Remove border
+            element.style.background = 'none';     // Remove background
+            element.style.appearance = 'none';     // Remove default appearance (if supported)
+            element.style.pointerEvents = 'none';  // Disable user interaction
+        });
         html2canvas(input, { scale: 2 }).then((canvas) => {
             const imgData = canvas.toDataURL('image/jpeg', 0.75);
             const pdf = new jsPDF('p', 'mm', 'a4'); // A4 页面纵向
@@ -321,9 +382,6 @@ const QuotationPage = () => {
             const margin = 10; // 边距（mm）
 
             const imgWidth = pageWidth - margin * 2; // 内容宽度
-            const imgHeight = (canvas.height * imgWidth) / canvas.width; // 按比例计算内容高度
-
-            let position = margin; // 初始位置，带上边距
             let remainingHeight = canvas.height; // 剩余的高度
             let yOffset = 0; // 当前内容绘制的起始位置
 
@@ -346,6 +404,24 @@ const QuotationPage = () => {
             }
             pdf.save('quotation.pdf');
             elements.forEach((el) => (el.style.display = ''));
+            selects.forEach((select) => {
+                select.style.borderWidth = '1px'; // 设置边框宽度
+                select.style.borderStyle = 'solid'; // 设置边框样式
+                select.style.borderColor = 'black'; // 可选：设置边框颜色
+            });
+
+            textArea.forEach((element) => {
+                element.style.borderWidth = '1px'; // 设置边框宽度
+                element.style.borderStyle = 'solid'; // 设置边框样式
+                element.style.borderColor = 'black'; // 可选：设置边框颜
+            });
+
+            dateInputs.forEach((dateInput) => {
+                dateInput.style.border = '';          // Remove the border
+                dateInput.style.background = 'none';     // Optional: remove background
+                dateInput.style.outline = 'none';        // Remove focus outline
+            });
+
         });
     };
 
@@ -672,25 +748,27 @@ const QuotationPage = () => {
                 <div className="quotation-details">
                     <div className="left-section">
                         <p>
-                            <span
-                                className="limited-width bold" id="to-select">To:<select className="limited-width bold">
-                                <option className="bold">Shanghai Zhenhua Heavy Industries Company Limited</option>
-                                <option>Other Company A</option>
-                                <option>Other Company B</option>
-                            </select></span>
+            <span className="limited-width bold" id="to-select">
+                To:
+                <select className="limited-width bold">
+                    <option className="bold" id="to-select-print">Shanghai Zhenhua Heavy Industries Company Limited</option>
+                    <option>Other Company A</option>
+                    <option>Other Company B</option>
+                </select>
+            </span>
                         </p>
 
                         <p>
-                            <div className="limited-width bold">Address:
+                            <div className="limited-width bold">
+                                Address:
                                 <select className="limited-width bold" id="address-textarea">
-                                    <option className="bold">3261 Dong Fang Road 200125 SHANGHAI, P.R. CHINA</option>
+                                    <option className="bold" id="address-print">3261 Dong Fang Road 200125 SHANGHAI, P.R. CHINA</option>
                                     <option>Other Address A</option>
                                     <option>Other Address B</option>
                                 </select>
                             </div>
                         </p>
-
-                        {/* 空行 */}
+                {/* 空行 */}
                         <div className="spaced-line"></div>
 
                         <div className="aligned-terms">
@@ -721,13 +799,18 @@ const QuotationPage = () => {
                         <p><strong>Quotation no.:</strong> <textarea className="bold limited-widthInput" id="quotation-no">820076435-R1</textarea></p>
                         <p>
                             <strong>Contact Person:</strong>
-                            <select value={selectedContact.name} onChange={handleContactChange}>
+                            <select
+                                className="bold-large-select"
+                                value={selectedContact.name}
+                                onChange={handleContactChange}
+                            >
                                 {contacts.map((contact) => (
                                     <option key={contact.name} value={contact.name}>
                                         {contact.name}
                                     </option>
                                 ))}
                             </select>
+
                         </p>
                         <p>
                             <strong>Tel:</strong> <span>{selectedContact.tel}</span>
@@ -843,7 +926,7 @@ const QuotationPage = () => {
                                 </td>
                                 <td></td>
                                 <td></td>
-                                <td></td>
+                                <td>{unitCost[index]}</td>
                             </tr>
                             {tableShowIndexes.has(index) && option?.selectedItems?.map((item, subIndex) => (
                                 <tr key={`${item}-${index}`}>
